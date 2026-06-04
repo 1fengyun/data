@@ -58,7 +58,7 @@ else:
                 "current_session":st.session_state.current_session}#保存所有数据
             if not os.path.exists("sessions"):
                 os.mkdir("sessions")#判断sessions是否存在,不存在则创建
-            with open(f"sessions/{st.session_state.current_session}.json", "w", encoding="utf-8") as t:
+            with open(f"sessions/{st.session_state.current_session}.json","w",encoding="utf-8") as t:
                 json.dump(session_data,t,ensure_ascii=False,indent=4)#数据保存至sessions文件夹中
     def get_session():#定义函数,展示会话
         session_list=[]
@@ -99,10 +99,9 @@ else:
         now=datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")#格式化时间
         st.session_state.current_session=now
     with st.sidebar:#左侧边栏
-        st.subheader("AI information")#标题
         if st.button("create a new conversation",width="stretch",icon="✏️"):#判断是否点击按钮(按钮内容,布局("stretch"占满),内容前的符号)
             save_session()
-            if st.session_state.messages is not None:#如果消息非空,则创建新会话
+            if st.session_state.messages:#如果消息非空,则创建新会话
                 st.session_state.messages=[]
                 st.session_state.current_session=datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
                 save_session()
@@ -120,6 +119,7 @@ else:
                     delete_session(session)
                     st.rerun()
         st.divider()#分割线
+        st.subheader("AI information")
         nick_name=st.text_input("name",placeholder="please enter the nickname of the AI intelligence",value=st.session_state.nick_name)#AI昵称(名字,提示信息,填充的内容)
         if nick_name:
             st.session_state.nick_name=nick_name
