@@ -4,15 +4,11 @@ import streamlit as st
 import datetime
 import json
 import pandas as pd
-from pyecharts.charts import Bar
-from pyecharts.globals import ThemeType
-from pyecharts import options as opts
-from streamlit_echarts5 import st_pyecharts
 st.set_page_config(#页面配置项
     page_title="BWM introduction",#网站域名
     page_icon="❄️",#网站图标
     layout="centered",#布局(wide占满,centered居中,None不设置默认剧中)
-    initial_sidebar_state="expanded",#侧边栏扩展
+    initial_sidebar_state="expanded",#侧边栏默认展开(可手动收起,auto默认,collapsed默认收起)
     menu_items={#右上角三个点中选项及展示的内容
         "Get Help":"https://www.bmwusa.com/home.html",
         "About":"This is a website introducing BMW."})
@@ -33,46 +29,6 @@ df=pd.read_csv("resource/excel.csv",encoding="utf-8")
 #st.table(df)#加入静态表格
 st.dataframe(df)#加入动态表格
 st.logo("resource/logo.png")#加入logo
-bar=Bar(init_opts=opts.InitOpts(theme=ThemeType.WHITE))
-bar.add_xaxis(xaxis_data=["engine(500 points)","maximum horsepower","Battery life(km)","chassis stability(500 points)"])
-bar.add_yaxis("BMW M4 Competition xDrive",#图例
-              y_axis=[465,523,500,465],
-              label_opts=opts.LabelOpts(position="top"),
-              category_gap=5,
-              color="black")
-bar.add_yaxis("Audi RS5 Coupe",#图例
-              y_axis=[435,444,505,440],
-              label_opts=opts.LabelOpts(position="top"),
-              category_gap=5,
-              color="blue")
-bar.add_yaxis("Mercedes-AMG C63 S E Performance",#图例
-              y_axis=[425,671,330,435],
-              label_opts=opts.LabelOpts(position="top"),
-              category_gap=5,
-              color="green")
-bar.add_yaxis("Porsche 718 Cayman GTS 4.0",#图例
-              y_axis=[485,394,430,475],
-              label_opts=opts.LabelOpts(position="top"),
-              category_gap=5,
-              color="red")
-bar.set_global_opts(xaxis_opts=opts.AxisOpts(is_show=True,
-                                             min_=0,
-                                             max_=3,
-                                             boundary_gap=True,
-                                             splitline_opts=opts.SplitLineOpts(is_show=False),
-                                             type_="category",
-                                             axispointer_opts=opts.AxisPointerOpts(is_show=True,
-                                                                                   type_="shadow")),
-                    tooltip_opts=opts.TooltipOpts(is_show=True,
-                                                  trigger="axis",
-                                                  axis_pointer_type="cross"),
-                    yaxis_opts=opts.AxisOpts(is_show=True,
-                                             min_=0,
-                                             max_=700,
-                                             splitline_opts=opts.SplitLineOpts(is_show=True)),
-                    title_opts=opts.TitleOpts(title="BMW comparison with other models",
-                                              title_link="https://www.bmwusa.com/home.html"))
-st_pyecharts(bar)
 prompt=st.chat_input("What do you want to consult?")#消息输入框(提示信息)
 if "DEEPSEEK_API_KEY" not in os.environ:
     if prompt is not None:
@@ -99,24 +55,24 @@ else:
                 "messages":st.session_state.messages,
                 "nick_name":st.session_state.nick_name,
                 "nature":st.session_state.nature,
-                "current_session":st.session_state.current_session}  # 保存所有数据
+                "current_session":st.session_state.current_session}#保存所有数据
             if not os.path.exists("sessions"):
                 os.mkdir("sessions")#判断sessions是否存在,不存在则创建
-            with open(f"sessions/{st.session_state.current_session}.json","w",encoding="utf-8") as t:
+            with open(f"sessions/{st.session_state.current_session}.json", "w", encoding="utf-8") as t:
                 json.dump(session_data,t,ensure_ascii=False,indent=4)#数据保存至sessions文件夹中
     def get_session():#定义函数,展示会话
         session_list=[]
-        if os.path.exists("sessions"):#判断是否存在该文件
+        if os.path.exists("sessions"):#判断是否存在该文件夹
             file_list=os.listdir("sessions")#获取sessions文件夹下的所有文件名
             for filename in file_list:
-                if filename.endswith(".json"):#判断是否是历史会话信息文件
+                if filename.endswith(".json"):#判断是否是json后缀文件
                     session_list.append(filename[:-5])
         session_list.sort(reverse=True)#降序排序
         return session_list
     def load_session(session_name):#定义函数,加载会话
         try:
             if os.path.exists(f"sessions/{session_name}.json"):
-                with open(f"sessions/{session_name}.json","r",encoding="utf-8") as f:
+                with open(f"sessions/{session_name}.json", "r", encoding="utf-8") as f:
                     session_data=json.load(f)
                     st.session_state.messages=session_data["messages"]
                     st.session_state.nick_name=session_data["nick_name"]
